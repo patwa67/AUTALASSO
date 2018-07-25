@@ -160,6 +160,7 @@ f = LeastSquares(Xtrainhot, ytrain) # The least squares loss function
 abscov = abs.(Base.cov(Xtrainhot,ytrain)) # Marginal covariances in absolute format
 nu = 1.0
 abscovinv = 1./(abscov.^nu) # Inverse covariances to be used as weights in the adaptive lasso
+# Note that the standard LASSO can be obtained by assigning a vector of ones to abscovinv
 @time res = gss_opt(alam, blam, tolgss, Xtesthot, ytest,abscovinv,maxnorm) # Run AUTALASSO
 
 # Save regression coefficients, lambda and MSE to files
