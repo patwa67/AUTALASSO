@@ -4,8 +4,8 @@
 using ProximalOperators
 
 # Read QTLMAS2010 data
-X = readdlm("/home/patrik/Julia/QTLMAS2010ny012.csv",',') #SNP data coded 0,1,2
-ytot = (X[:,1].-mean(X[:,1])) #First column is the phenotype
+X = readdlm("QTLMAS2010ny012.csv",',') #SNP data coded 0,1,2
+ytot = (X[:,1].-mean(X[:,1])) #First column is the phenotype, here mean-centered
 ytrain = ytot[1:2326] #Generation 1-4 is training data
 Xtrain = X[1:2326,2:size(X)[2]] #The rest of the columns are SNPs
 ytest = ytot[2327:size(X)[1]] #Generation 5 is test data
