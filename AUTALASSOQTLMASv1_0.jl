@@ -7,7 +7,7 @@ using Statistics
 using LinearAlgebra
 
 # Read QTLMAS2010 data
-X = readdlm("/home/pawn0002/Dokument/julia/QTLMAS2010ny012.csv",',')
+X = readdlm("QTLMAS2010ny012.csv",',')
 ytot = (X[:,1].-mean(X[:,1]))
 ytrain = ytot[1:2326]
 Xtest= X[2327:size(X)[1],2:size(X)[2]]
