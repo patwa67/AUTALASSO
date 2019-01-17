@@ -116,7 +116,8 @@ function gss_opt(alam, blam, tolgss, Xtesthot, ytest,abscovinv,maxnorm)
 end
 
 # Read QTLMAS2010 data, and partition into train and test parts
-X = readdlm("/home/pawn0002/Dokument/julia/QTLMAS2010ny012.csv",',')
+# (given that the data file is in the working directory)
+X = readdlm("QTLMAS2010ny012.csv",',')
 ytot = (X[:,1].-mean(X[:,1])) # Center y to mean zero
 ytrain = ytot[1:2326]
 Xtest= X[2327:size(X)[1],2:size(X)[2]]
