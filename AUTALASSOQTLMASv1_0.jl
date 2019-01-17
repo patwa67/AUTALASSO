@@ -140,7 +140,6 @@ Xtrain0 = 0
 Xtrain1 = 0
 Xtrain2 = 0
 Xtrain = 0
-X = 0
 
 # One hot encoding test data
 Xtest0 = copy(Xtest)
