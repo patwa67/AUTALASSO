@@ -6,51 +6,7 @@ using DelimitedFiles
 using Statistics
 using LinearAlgebra
 
-# Read QTLMAS2010 data
-X = readdlm("QTLMAS2010ny012.csv",',')
-ytot = (X[:,1].-mean(X[:,1]))
-ytrain = ytot[1:2326]
-Xtest= X[2327:size(X)[1],2:size(X)[2]]
-ytest = ytot[2327:size(X)[1]]
-Xtrain = X[1:2326,2:size(X)[2]]
-
-# One hot encoding training data
-Xtrain0 = copy(Xtrain)
-Xtrain1 = copy(Xtrain)
-Xtrain2 = copy(Xtrain)
-Xtrain0[Xtrain0.==1] .= 2
-Xtrain0[Xtrain0.==0] .= 1
-Xtrain0[Xtrain0.==2] .= 0
-Xtrain1[Xtrain1.==2] .= 0
-Xtrain2[Xtrain2.==1] .= 0
-Xtrain2[Xtrain2.==2] .= 1
-Xtrainhot = hcat(Xtrain0,Xtrain1,Xtrain2)
-# Set unimportant allocations to zero
-Xtrain0 = 0
-Xtrain1 = 0
-Xtrain2 = 0
-Xtrain = 0
-X = 0
-
-# One hot encoding test data
-Xtest0 = copy(Xtest)
-Xtest1 = copy(Xtest)
-Xtest2 = copy(Xtest)
-Xtest0[Xtest0.==1] .= 2
-Xtest0[Xtest0.==0] .= 1
-Xtest0[Xtest0.==2] .= 0
-Xtest1[Xtest1.==2] .= 0
-Xtest2[Xtest2.==1] .= 0
-Xtest2[Xtest2.==2] .= 1
-Xtesthot = hcat(Xtest0,Xtest1,Xtest2)
-# Set unimportant allocations to zero
-Xtest0 = 0
-Xtest1 = 0
-Xtest2 = 0
-Xtest = 0
-
-
-# Proximal ADMM lasso with line search
+# Function for Proximal ADMM lasso with line search
 function lasso_admm(Xtrainhot, ytrain, lam, theta, beta, f, abscovinv,tol; maxit=5000)
   u = zero(theta)
   grad = zero(theta)
@@ -82,7 +38,7 @@ function lasso_admm(Xtrainhot, ytrain, lam, theta, beta, f, abscovinv,tol; maxit
   return theta,beta,tol
 end
 
-# Golden section search for optimization of lambda
+# Function for Golden section search to optimize lambda
 function gss_opt(alam, blam, tolgss, Xtesthot, ytest,abscovinv,maxnorm)
   lama =alam*maxnorm # Lower lambda
   lamb =blam*maxnorm # Higher lambda
@@ -159,18 +115,70 @@ function gss_opt(alam, blam, tolgss, Xtesthot, ytest,abscovinv,maxnorm)
   return lamopt,fopt,lossopt,acc
 end
 
-alam = 0.0001 # Factor for initial lower lambda
-blam = 1.0 # Factor for initial upper lambda
-tolgss = 0.01 # Convergence factor for lambda in
-maxnorm=norm(Xtrainhot'*ytrain, Inf) # Find lambda where all reg coeff are zero
-f = LeastSquares(Xtrainhot, ytrain) # The least squares loss function
-abscov = abs.(cov(Xtrainhot,ytrain)) # Marginal covariances in absolute format
-nu = 1.0
-abscovinv = 1.0./abscov # Inverse covariances to be used as weights in the adaptive lasso
-@time res = gss_opt(alam, blam, tolgss, Xtesthot, ytest,abscovinv,maxnorm) # Run AUTALASSO
+# Read QTLMAS2010 data, and partition into train and test parts
+X = readdlm("/home/pawn0002/Dokument/julia/QTLMAS2010ny012.csv",',')
+ytot = (X[:,1].-mean(X[:,1])) # Center y to mean zero
+ytrain = ytot[1:2326]
+Xtest= X[2327:size(X)[1],2:size(X)[2]]
+ytest = ytot[2327:size(X)[1]]
+Xtrain = X[1:2326,2:size(X)[2]]
 
-# Save regression coefficients, lambda, MSE and ACC to files
+# One hot encoding training data
+Xtrain0 = copy(Xtrain)
+Xtrain1 = copy(Xtrain)
+Xtrain2 = copy(Xtrain)
+Xtrain0[Xtrain0.==1] .= 2
+Xtrain0[Xtrain0.==0] .= 1
+Xtrain0[Xtrain0.==2] .= 0
+Xtrain1[Xtrain1.==2] .= 0
+Xtrain2[Xtrain2.==1] .= 0
+Xtrain2[Xtrain2.==2] .= 1
+Xtrainhot = hcat(Xtrain0,Xtrain1,Xtrain2)
+# Set unimportant allocations to zero
+Xtrain0 = 0
+Xtrain1 = 0
+Xtrain2 = 0
+Xtrain = 0
+X = 0
+
+# One hot encoding test data
+Xtest0 = copy(Xtest)
+Xtest1 = copy(Xtest)
+Xtest2 = copy(Xtest)
+Xtest0[Xtest0.==1] .= 2
+Xtest0[Xtest0.==0] .= 1
+Xtest0[Xtest0.==2] .= 0
+Xtest1[Xtest1.==2] .= 0
+Xtest2[Xtest2.==1] .= 0
+Xtest2[Xtest2.==2] .= 1
+Xtesthot = hcat(Xtest0,Xtest1,Xtest2)
+# Set unimportant allocations to zero
+Xtest0 = 0
+Xtest1 = 0
+Xtest2 = 0
+Xtest = 0
+
+# Factor for initial lower lambda
+alam = 0.0001
+# Factor for initial upper lambda
+blam = 1.0
+# Convergence factor for lambda in gss_opt
+tolgss = 0.01
+# Find lambda where all reg coeff are zero
+maxnorm = norm(Xtrainhot'*ytrain, Inf)
+# The least squares loss function
+f = LeastSquares(Xtrainhot, ytrain)
+# Inverse covariances to be used as weights in the adaptive lasso
+abscovinv = 1.0./abs.(cov(Xtrainhot,ytrain))
+
+# Run AUTALASSO with timing
+@time res = gss_opt(alam, blam, tolgss, Xtesthot, ytest,abscovinv,maxnorm)
+
+# Save regression coefficients, lambda, MSE and ACC to text files
 writedlm("outbetaQTLMAS.txt", res[2][1])
 writedlm("outlambdaQTLMAS.txt", res[1])
 writedlm("outMSEQTLMAS.txt", res[3]/length(ytest)*2)
 writedlm("outACCQTLMAS.txt", res[4])
+
+# Predict observations for test data
+ytesthat = Xtesthot*res[2][1]
